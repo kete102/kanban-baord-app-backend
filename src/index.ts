@@ -1,9 +1,13 @@
-import express from 'express'
-import cors from 'cors'
+import 'dotenv/config' // To read CLERK_SECRET_KEY and CLERK_PUBLISHABLE_KEY
+import {ClerkExpressWithAuth} from '@clerk/clerk-sdk-node'
+import express, {Application} from 'express'
 
-const app = express()
-app.use(cors())
+const port = process.env.PORT ?? 3000
 
-app.listen(3000, () => {
-	console.log('Server running on port: ', 3000)
+const app: Application = express()
+
+app.get('/api/*', ClerkExpressWithAuth({}))
+
+app.listen(port, () => {
+	console.log(`Server lintening on port: ${port}`)
 })
