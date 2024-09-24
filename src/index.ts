@@ -1,4 +1,4 @@
-import 'dotenv/config' // To read CLERK_SECRET_KEY and CLERK_PUBLISHABLE_KEY
+import 'dotenv/config'
 import {ClerkExpressWithAuth} from '@clerk/clerk-sdk-node'
 import express, {Application} from 'express'
 
