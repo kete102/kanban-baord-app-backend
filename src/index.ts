@@ -48,6 +48,12 @@ app.get(
 	}
 )
 
+app.get('/api/boards', (_req, res) => {
+	res.json({
+		boards: 'Tus boards',
+	})
+})
+
 app.listen(port, () => {
 	console.log(`Server lintening on port: ${port}`)
 })
