@@ -6,6 +6,7 @@ import express, {Application} from 'express'
 import {StrictAuthProp} from '@clerk/clerk-sdk-node'
 import {boardRoutes} from './routes/boards'
 import {authRoutes} from './routes/auth'
+import {connectToDB} from './db/db'
 
 declare global {
 	namespace Express {
@@ -15,6 +16,7 @@ declare global {
 
 const port = process.env.PORT || 3000
 const app: Application = express()
+connectToDB()
 
 app.use(express.json())
 app.use(

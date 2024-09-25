@@ -13,11 +13,17 @@ authRoutes.get(
 	}),
 	async (req, res, next) => {
 		const {sessionId} = req.auth
+		if (!sessionId) {
+			res.status(401).json({
+				error: 'User  not authenticated',
+			})
+		}
 		const {sessions} = ClerkClient
 		const {userId} = await sessions.getSession(sessionId)
 		//TODO: Aqui va la logica de guardar en el base de datos al usuario
-		console.log('Llamad a auth: ', userId)
-		res.json(userId)
-		if (sessionId) next()
+		// Comprobar si ya esta en la base de datos. Si no lo esta guardarlo
+		// Siempre devolviendo su clerkId
+		res.status(201).json(userId)
+		next()
 	}
 )
