@@ -1,5 +1,4 @@
 import {ClerkExpressRequireAuth} from '@clerk/clerk-sdk-node'
-import ClerkClient from '../config'
 import {Router} from 'express'
 
 export const boardRoutes = Router()
@@ -11,13 +10,14 @@ boardRoutes.use(
 			console.log(error)
 		},
 	}),
-	async (req, _res, next) => {
+	async (req, res, next) => {
 		const {sessionId} = req.auth
-		const {sessions} = ClerkClient
-		const {userId} = await sessions.getSession(sessionId)
-		//TODO: Aqui va la logica de guardar en el base de datos al usuario
-		console.log('Llamad a auth: ', userId)
-		if (sessionId) next()
+		if (!sessionId) {
+			res.status(401).json({
+				error: 'Not authenticated',
+			})
+		}
+		next()
 	}
 )
 

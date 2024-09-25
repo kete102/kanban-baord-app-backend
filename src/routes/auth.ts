@@ -1,6 +1,7 @@
 import {ClerkExpressRequireAuth} from '@clerk/clerk-sdk-node'
 import ClerkClient from '../config'
 import {Router} from 'express'
+import {User} from '../models/User'
 
 export const authRoutes = Router()
 
@@ -23,7 +24,11 @@ authRoutes.get(
 		//TODO: Aqui va la logica de guardar en el base de datos al usuario
 		// Comprobar si ya esta en la base de datos. Si no lo esta guardarlo
 		// Siempre devolviendo su clerkId
-		res.status(201).json(userId)
+		const newUser = new User({
+			clerkId: userId,
+		})
+		await newUser.save()
+		res.status(201).json(newUser.clerkId)
 		next()
 	}
 )
