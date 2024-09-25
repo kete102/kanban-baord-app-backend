@@ -3,14 +3,9 @@
 import 'dotenv/config'
 import cors from 'cors'
 import express, {Application} from 'express'
-import {
-	ClerkExpressRequireAuth,
-	createClerkClient,
-	StrictAuthProp,
-} from '@clerk/clerk-sdk-node'
-
-const port = process.env.PORT || 3000
-const app: Application = express()
+import {StrictAuthProp} from '@clerk/clerk-sdk-node'
+import {boardRoutes} from './routes/boards'
+import {authRoutes} from './routes/auth'
 
 declare global {
 	namespace Express {
@@ -18,9 +13,8 @@ declare global {
 	}
 }
 
-const clerkClient = createClerkClient({
-	secretKey: process.env.CLERK_SECRET_KEY,
-})
+const port = process.env.PORT || 3000
+const app: Application = express()
 
 app.use(express.json())
 app.use(
@@ -31,28 +25,8 @@ app.use(
 	})
 )
 
-app.get(
-	'/api/auth',
-	ClerkExpressRequireAuth({
-		onError: (error) => {
-			console.log(error)
-		},
-	}),
-	async (req, res) => {
-		const {sessionId} = req.auth
-		const {sessions} = clerkClient
-		const {userId} = await sessions.getSession(sessionId)
-		//TODO: Aqui va la logica de guardar en el base de datos al usuario
-		console.log('Llamad a auth: ', userId)
-		res.json({userId: userId})
-	}
-)
-
-app.get('/api/boards', (_req, res) => {
-	res.json({
-		boards: 'Tus boards',
-	})
-})
+app.use('/api/auth', authRoutes)
+app.use('/api/boards', boardRoutes)
 
 app.listen(port, () => {
 	console.log(`Server lintening on port: ${port}`)
