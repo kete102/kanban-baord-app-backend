@@ -61,11 +61,8 @@ boardRoutes.post('/', async (req, res) => {
 		// 3. Guardar la nueva board en la base de datos
 		await newBoard.save()
 
-		// 4. Encontrar todas las boards del usuario
-		const boards = await Board.find({userId: user._id})
-
-		// 5. Devolver el array actualizado de boards
-		return res.status(200).json({boards})
+		// 4. Devolver el array actualizado de boards
+		return res.status(200).json({newBoard})
 	} catch (error) {
 		// Manejo de errores
 		console.error(error)
