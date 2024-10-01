@@ -61,7 +61,7 @@ boardRoutes.post('/', async (req, res) => {
 		// 3. Guardar la nueva board en la base de datos
 		await newBoard.save()
 
-		// 4. Devolver el array actualizado de boards
+		// 4. Devolver el nuevo board
 		return res.status(200).json({newBoard})
 	} catch (error) {
 		// Manejo de errores
@@ -72,29 +72,20 @@ boardRoutes.post('/', async (req, res) => {
 	}
 })
 
-// boardRoutes.post('/', async (req, res) => {
-// 	const {userId} = req.auth
-// 	const {boardTitle, boardDescription} = req.body
-//
-// 	User.findOne({clerkId: userId}).then(async (user) => {
-// 		if (!user) {
-// 			res.status(400).json({
-// 				error: 'User not found',
-// 			})
-// 		} else {
-// 			const newBoard = new Board({
-// 				userId: user._id,
-// 				boardTitle,
-// 				boardDescription,
-// 			})
-//
-// 			const saved = newBoard.save()
-// 			if (!saved) res.status(400).json({error: 'Board not saved'})
-// 			Board.find({userId: user._id}).then(async (boards) => {
-// 				if (boards) {
-// 					res.status(200).json({boards})
-// 				}
-// 			})
-// 		}
-// 	})
-// })
+boardRoutes.delete('/:boardId', async (req, res) => {
+	const {boardId} = req.params
+	const {userId} = req.auth
+	try {
+		const user = await User.findOne({clerkId: userId})
+
+		if (!user) {
+			return res.status(400).json({
+				error: 'User not found',
+			})
+		}
+
+		Board.findByIdAndDelete(boardId)
+	} catch (error) {
+		console.log(error)
+	}
+})
