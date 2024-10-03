@@ -83,8 +83,13 @@ boardRoutes.delete('/:boardId', async (req, res) => {
 				error: 'User not found',
 			})
 		}
-
-		Board.findByIdAndDelete(boardId)
+		Board.findByIdAndDelete(boardId).then((deletedBoard) => {
+			if (!deletedBoard) {
+				return res.status(400).json({message: 'Board not  found'})
+			} else {
+				return res.status(200).json({message: 'Board deleted', deletedBoard})
+			}
+		})
 	} catch (error) {
 		console.log(error)
 	}
