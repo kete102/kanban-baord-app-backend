@@ -15,14 +15,14 @@ declare global {
 	}
 }
 
-const port = process.env.PORT ?? 3000
+const port = process.env.PORT || 3000
 const app: Application = express()
 connectToDB()
 
 app.use(express.json())
 app.use(
 	cors({
-		origin: 'http://localhost:5173',
+		origin: '*',
 		methods: ['POST', 'GET', 'PATCH', 'DELETE'],
 		allowedHeaders: ['Content-Type', 'Authorization'],
 	})
