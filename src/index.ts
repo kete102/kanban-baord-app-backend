@@ -6,6 +6,7 @@ import express, {Application} from 'express'
 import {StrictAuthProp} from '@clerk/clerk-sdk-node'
 import {boardRoutes} from './routes/boards'
 import {authRoutes} from './routes/auth'
+import {tasksRoutes} from './routes/tasks'
 import {connectToDB} from './db/db'
 
 declare global {
@@ -14,7 +15,7 @@ declare global {
 	}
 }
 
-const port = process.env.PORT || 3000
+const port = process.env.PORT ?? 3000
 const app: Application = express()
 connectToDB()
 
@@ -29,6 +30,7 @@ app.use(
 
 app.use('/api/auth', authRoutes)
 app.use('/api/boards', boardRoutes)
+app.use('/api/tasks', tasksRoutes)
 
 app.listen(port, () => {
 	console.log(`Server lintening on port: ${port}`)
