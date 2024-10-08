@@ -14,8 +14,9 @@ declare global {
 		interface Request extends StrictAuthProp {}
 	}
 }
-
-const port = process.env.PORT || 3000
+const HOST = '0.0.0.0'
+const port = process.env.PORT || '3000'
+const PORT = parseInt(port, 10)
 const app: Application = express()
 connectToDB()
 
@@ -28,14 +29,16 @@ app.use(
 	})
 )
 
-app.get('/ping', (req, res) => {
-	return res.status(200).json('pong')
+app.get('/ping', (_req, res) => {
+	return res.json({
+		message: 'pong',
+	})
 })
 
 app.use('/api/auth', authRoutes)
 app.use('/api/boards', boardRoutes)
 app.use('/api/tasks', tasksRoutes)
 
-app.listen(port, () => {
+app.listen(PORT, HOST, () => {
 	console.log(`Server lintening on port: ${port}`)
 })
