@@ -28,6 +28,10 @@ app.use(
 	})
 )
 
+app.get('/ping', (req, res) => {
+	return res.status(200).json('pong')
+})
+
 app.use('/api/auth', authRoutes)
 app.use('/api/boards', boardRoutes)
 app.use('/api/tasks', tasksRoutes)
