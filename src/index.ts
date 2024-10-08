@@ -28,6 +28,11 @@ app.use(
 		allowedHeaders: ['Content-Type', 'Authorization'],
 	})
 )
+app.get('/', (_req, res) => {
+	res.status(200).json({
+		message: 'Hola',
+	})
+})
 
 app.get('/ping', (_req, res) => {
 	return res.json({
