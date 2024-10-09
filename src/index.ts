@@ -8,15 +8,13 @@ import {boardRoutes} from './routes/boards'
 import {authRoutes} from './routes/auth'
 import {tasksRoutes} from './routes/tasks'
 import {connectToDB} from './db/db'
+import {PORT} from './config'
 
 declare global {
 	namespace Express {
 		interface Request extends StrictAuthProp {}
 	}
 }
-const HOST = '0.0.0.0'
-const port = process.env.PORT || '3000'
-const PORT = parseInt(port, 10)
 const app: Application = express()
 connectToDB()
 
@@ -30,7 +28,7 @@ app.use(
 )
 app.get('/', (_req, res) => {
 	res.status(200).json({
-		message: 'Hola',
+		message: 'Welcome',
 	})
 })
 
@@ -44,6 +42,6 @@ app.use('/api/auth', authRoutes)
 app.use('/api/boards', boardRoutes)
 app.use('/api/tasks', tasksRoutes)
 
-app.listen(PORT, HOST, () => {
-	console.log(`Server lintening on port: ${port}`)
+app.listen(PORT, () => {
+	console.log(`Server lintening on port: ${PORT}`)
 })
