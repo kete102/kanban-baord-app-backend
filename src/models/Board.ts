@@ -1,10 +1,15 @@
-import mongoose, {model, Schema, Types} from 'mongoose'
+import mongoose, {model, Schema} from 'mongoose'
+import {taskSchema} from './Task'
+import {IBoard, IColumn} from '../types'
 
-interface IBoard {
-	boardTitle: string
-	boardDescription: string
-	userId: Types.ObjectId
-}
+const columnSchema = new Schema<IColumn>({
+	columnId: {
+		type: String,
+		enum: ['todo', 'inprogess', 'done'],
+		required: true,
+	},
+	tasks: [taskSchema],
+})
 
 const boardSchema = new Schema<IBoard>({
 	boardTitle: {
@@ -18,6 +23,11 @@ const boardSchema = new Schema<IBoard>({
 	userId: {
 		type: mongoose.Schema.Types.ObjectId,
 		ref: 'User',
+	},
+	columns: {
+		type: Map,
+		of: columnSchema,
+		required: true,
 	},
 })
 
