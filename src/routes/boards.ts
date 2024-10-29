@@ -39,7 +39,7 @@ boardRoutes.get('/', (req, res) => {
 
 boardRoutes.post('/', async (req, res) => {
 	const {userId} = req.auth
-	const {boardTitle, boardDescription, columns} = req.body
+	const {boardTitle, boardDescription, columns, createdAt} = req.body
 
 	try {
 		// 1. Buscar el usuario por el ID de clerk
@@ -57,6 +57,7 @@ boardRoutes.post('/', async (req, res) => {
 			boardTitle,
 			boardDescription,
 			columns,
+			createdAt,
 		})
 
 		// 3. Guardar la nueva board en la base de datos

@@ -1,9 +1,8 @@
 import {ClerkExpressRequireAuth} from '@clerk/clerk-sdk-node'
 import {Router} from 'express'
-import {User} from '../models/User'
 import {Task} from '../models/Task'
+import {ITask} from '../types'
 import {Board} from '../models/Board'
-import {ColumnType, IColumn, ITask} from '../types'
 
 export const tasksRoutes = Router()
 
@@ -27,53 +26,63 @@ tasksRoutes.use(
 
 //TODO: Get all tasks
 tasksRoutes.get('/:id', async (req, res) => {
-	const boardId = req.params // Asegúrate de acceder correctamente al boardId
+	const boardId = req.params.id // Asegúrate de acceder correctamente al boardId
 	const {userId} = req.auth
 
 	// Buscar las tareas para un usuario y un board específico
 	const tasks: ITask[] = await Task.find({userId: userId, boardId: boardId})
 
-	// Definir los tipos de columnas según tu interfaz
-	const columnTypes: ColumnType[] = ['todo', 'inprogess', 'done']
-
-	// Inicializar el Map con todas las columnas
-	const columns = columnTypes.reduce((acc, columnType) => {
-		acc.set(columnType, {
-			columnId: columnType,
-			tasks: [],
-		})
-		return acc
-	}, new Map<ColumnType, IColumn>())
-
-	// Rellenar el Map con las tareas correspondientes
-	tasks.forEach((task) => {
-		columns.get(task.status)!.tasks.push({
-			taskId: task.taskId,
-			userId: task.userId,
-			taskTitle: task.tasksTitle,
-			taskDescription: task.taskDescription,
-			status: task.status,
-			priority: task.priority,
-			createdAt: task.createdAt,
-		})
-	})
-
-	// Convertir el Map a un objeto plano para que sea compatible con JSON
-	const objectColumns = Object.fromEntries(columns)
-
-	// Devolver las columnas como respuesta JSON
-	return res.status(200).json({objectColumns})
+	console.log('Get tasks: ', {tasks})
+	return res.status(200).json({tasks})
 })
 //TODO: Create a task
 tasksRoutes.post('/:id', (req, res) => {
-	const boardId = req.params
-	const body = req.body
+	const boardId = req.params.id
+	const {taskTitle, taskDescription, status, priority, endDate, createdAt} =
+		req.body
 	const {userId} = req.auth
-	console.log({boardId, userId, body})
-	res.status(200).json({
-		message: 'Create new task',
+	console.log({
+		taskTitle,
+		taskDescription,
+		status,
+		priority,
+		createdAt,
+		endDate,
 	})
+	try {
+		//1. Find board and check if exists
+		Board.findOne({_id: boardId}).then((board) => {
+			if (board) {
+				//Create new task based on the body data
+				const newTask = new Task({
+					userId: userId,
+					boardId: boardId,
+					status,
+					taskTitle,
+					taskDescription,
+					priority,
+					createdAt,
+					endDate,
+				})
+
+				//Save the task in the tasks collection
+				newTask.save()
+
+				//Return the created task if correctly saved
+				return res.status(200).json({newTask})
+			} else {
+				//If board not exists return 400 and error message
+				return res.status(400).json({message: 'Board not found'})
+			}
+		})
+	} catch (error) {
+		console.error(error)
+		return res.status(500).json({
+			error: 'Error creating task',
+		})
+	}
 })
+
 //TODO: Update a task
 tasksRoutes.patch('/', () => {})
 //TODO: Delete a task

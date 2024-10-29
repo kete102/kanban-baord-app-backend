@@ -1,13 +1,16 @@
-export type ColumnType = 'todo' | 'inprogess' | 'done'
+import mongoose from 'mongoose'
+
+export type ColumnType = 'todo' | 'inprogress' | 'done'
 
 export interface ITask {
-	taskId: string
 	userId: string
-	tasksTitle: string
+	boardId: string
+	taskTitle: string
 	taskDescription: string
 	status: ColumnType
 	priority: 'high' | 'low' | 'medium'
 	createdAt: string
+	endDate: string
 }
 
 export interface IColumn {
@@ -16,11 +19,10 @@ export interface IColumn {
 }
 
 export interface IBoard {
-	boardId: string
 	boardTitle: string
 	boardDescription: string
 	userId: mongoose.Schema.Types.ObjectId
-	columns: Map<ColumnType, Column>
+	createdAt: string
 }
 
 interface IUser {
