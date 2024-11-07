@@ -86,4 +86,27 @@ tasksRoutes.post('/:id', (req, res) => {
 //TODO: Update a task
 tasksRoutes.patch('/', () => {})
 //TODO: Delete a task
-tasksRoutes.delete('/', () => {})
+tasksRoutes.delete('/', (req, res) => {
+	const {boardId, taskId} = req.body
+	console.log({boardId, taskId})
+	Board.findById(boardId).then((board) => {
+		if (!board) {
+			res.status(300).json({
+				msg: 'No existe la board',
+			})
+		}
+		Task.findByIdAndDelete(taskId)
+			.then(() => {
+				console.log('Tarea eliminada')
+			})
+			.catch(() => {
+				console.log('Error al eliminar la tarea: ', taskId)
+			})
+	})
+	if (boardId && taskId) {
+		res.status(200).json({
+			msg: 'Tarea Eliminada',
+			deletedTaskId: taskId,
+		})
+	}
+})
