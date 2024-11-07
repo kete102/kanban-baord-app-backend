@@ -2,6 +2,7 @@ import {ClerkExpressRequireAuth} from '@clerk/clerk-sdk-node'
 import {Router} from 'express'
 import {User} from '../models/User'
 import {Board} from '../models/Board'
+import {Task} from '../models/Task'
 
 export const boardRoutes = Router()
 
@@ -92,6 +93,14 @@ boardRoutes.delete('/:boardId', async (req, res) => {
 				return res.status(200).json({message: 'Board deleted', deletedBoard})
 			}
 		})
+
+		Task.deleteMany({boardId: boardId})
+			.then(() => {
+				console.log('Data deleted')
+			})
+			.catch(() => {
+				console.log('Error')
+			})
 	} catch (error) {
 		console.log(error)
 	}
