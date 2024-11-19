@@ -10,7 +10,7 @@ boardRoutes.use(
 	'/*',
 	ClerkExpressRequireAuth({
 		onError: (error) => {
-			console.log(error)
+			console.log('Auth error: ', error)
 		},
 	}),
 	async (req, res, next) => {
