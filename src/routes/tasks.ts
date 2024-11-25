@@ -1,28 +1,10 @@
-import {ClerkExpressRequireAuth} from '@clerk/clerk-sdk-node'
 import {Router} from 'express'
 import {Task} from '../models/Task'
 import {ITask} from '../types'
 import {Board} from '../models/Board'
+import {MongooseError} from 'mongoose'
 
 export const tasksRoutes = Router()
-
-tasksRoutes.use(
-	'/*',
-	ClerkExpressRequireAuth({
-		onError: (error) => {
-			console.log('Auth error: ', error)
-		},
-	}),
-	async (req, res, next) => {
-		const {sessionId} = req.auth
-		if (!sessionId) {
-			res.status(401).json({
-				error: 'Not authenticated',
-			})
-		}
-		next()
-	}
-)
 
 //NOTE: Get all tasks
 tasksRoutes.get('/:id', async (req, res) => {
@@ -37,8 +19,15 @@ tasksRoutes.get('/:id', async (req, res) => {
 //NOTE: Create a task
 tasksRoutes.post('/:id', (req, res) => {
 	const boardId = req.params.id
-	const {taskTitle, taskDescription, status, priority, endDate, createdAt} =
-		req.body
+	const {
+		taskTitle,
+		taskDescription,
+		status,
+		priority,
+		endDate,
+		createdAt,
+		lastUpdate,
+	} = req.body
 	const {userId} = req.auth
 	try {
 		//1. Find board and check if exists
@@ -53,6 +42,7 @@ tasksRoutes.post('/:id', (req, res) => {
 					taskDescription,
 					priority,
 					createdAt,
+					lastUpdate,
 					endDate,
 				})
 
@@ -74,33 +64,39 @@ tasksRoutes.post('/:id', (req, res) => {
 	}
 })
 
-//NOTE: Update partial task
-tasksRoutes.patch('/', async (req, res) => {
+//NOTE: Update 'status' in task
+tasksRoutes.patch('/update-status', async (req, res) => {
 	const {taskId, newStatus} = req.body
 	const {userId} = req.auth
 	try {
-		const task = await Task.findOne({
-			_id: taskId,
+		const taskToUpdate = await Task.findOne({
 			userId: userId,
+			_id: taskId,
 		})
 
-		if (!task) {
+		if (!taskToUpdate) {
 			return res.status(404).json({
 				msg: 'No existe la task',
 			})
 		}
 
-		task.status = newStatus
-		await task.save()
+		taskToUpdate.status = newStatus
+		await taskToUpdate.save()
 
 		return res.status(200).json({
-			updatedTask: task,
+			updatedTask: taskToUpdate,
 		})
 	} catch (error) {
-		console.error('Error al actualizar la task: ', error)
+		if (error instanceof MongooseError) {
+			console.error('Error al actualizar la task: ', error.message)
+		}
+		console.log(error)
 		return res.status(500).json({error: 'Error interno del servidor'})
 	}
 })
+
+//TODO: update entire task
+// tasksRoutes.put('/update-task', (req, res) => {})
 
 //NOTE: Delete a task
 tasksRoutes.delete('/', (req, res) => {

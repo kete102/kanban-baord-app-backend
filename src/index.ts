@@ -3,7 +3,7 @@
 import 'dotenv/config'
 import cors from 'cors'
 import express, {Application} from 'express'
-import {StrictAuthProp} from '@clerk/clerk-sdk-node'
+import {ClerkExpressRequireAuth, StrictAuthProp} from '@clerk/clerk-sdk-node'
 import {boardRoutes} from './routes/boards'
 import {authRoutes} from './routes/auth'
 import {tasksRoutes} from './routes/tasks'
@@ -37,6 +37,24 @@ app.get('/ping', (_req, res) => {
 		message: 'pong',
 	})
 })
+
+app.use(
+	'/api/*',
+	ClerkExpressRequireAuth({
+		onError: (error) => {
+			console.log('Auth error: ', error)
+		},
+	}),
+	async (req, res, next) => {
+		const {sessionId} = req.auth
+		if (!sessionId) {
+			res.status(401).json({
+				error: 'Not authenticated',
+			})
+		}
+		next()
+	}
+)
 
 app.use('/api/auth', authRoutes)
 app.use('/api/boards', boardRoutes)

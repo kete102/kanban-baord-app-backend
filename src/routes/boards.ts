@@ -1,28 +1,9 @@
-import {ClerkExpressRequireAuth} from '@clerk/clerk-sdk-node'
 import {Router} from 'express'
 import {User} from '../models/User'
 import {Board} from '../models/Board'
 import {Task} from '../models/Task'
 
 export const boardRoutes = Router()
-
-boardRoutes.use(
-	'/*',
-	ClerkExpressRequireAuth({
-		onError: (error) => {
-			console.log('Auth error: ', error)
-		},
-	}),
-	async (req, res, next) => {
-		const {sessionId} = req.auth
-		if (!sessionId) {
-			res.status(401).json({
-				error: 'Not authenticated',
-			})
-		}
-		next()
-	}
-)
 
 boardRoutes.get('/', (req, res) => {
 	const {userId} = req.auth
