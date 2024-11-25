@@ -10,6 +10,7 @@ export interface ITask {
 	status: ColumnType
 	priority: 'high' | 'low' | 'medium'
 	createdAt: string
+	lastUpdate: number
 	endDate: string
 }
 

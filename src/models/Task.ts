@@ -17,6 +17,7 @@ export const taskSchema = new Schema<ITask>({
 		required: true,
 	},
 	createdAt: {type: String, required: true},
+	lastUpdate: {type: Number, required: true},
 	endDate: {type: String, required: true},
 })
 export const Task = model<ITask>('Task', taskSchema)
