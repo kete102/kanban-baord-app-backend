@@ -1,5 +1,10 @@
 import {User} from '../models/User'
 
 export async function checkIfUserInDb({userId}: {userId: string}) {
-	return User.exists({clerkId: userId})
+	const user = User.findOne({clerkId: userId})
+	if (user) {
+		return user
+	} else {
+		return false
+	}
 }

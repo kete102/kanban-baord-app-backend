@@ -1,8 +1,8 @@
-import mongoose, {model, Schema, Types} from 'mongoose'
+import {model, Schema} from 'mongoose'
 
 interface IUser {
 	clerkId: string
-	boards: Types.ObjectId[]
+	email: string
 }
 
 const userSchema = new Schema<IUser>({
@@ -10,9 +10,9 @@ const userSchema = new Schema<IUser>({
 		type: String,
 		required: true,
 	},
-	boards: {
-		type: [mongoose.Schema.Types.ObjectId],
-		ref: 'Board',
+	email: {
+		type: String,
+		required: true,
 	},
 })
 
