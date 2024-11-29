@@ -1,4 +1,4 @@
-import {User} from '../models/User'
+import {User} from '../models/UserModel'
 
 export async function checkIfUserInDb({userId}: {userId: string}) {
 	const user = User.findOne({clerkId: userId})

@@ -1,7 +1,7 @@
 import mongoose, {MongooseError} from 'mongoose'
-import {IUser, User} from '../../models/User'
-import {Task} from '../../models/Task'
-import {Board} from '../../models/Board'
+import {IUser, User} from '../../models/UserModel'
+import {Task} from '../../models/TaskModel'
+import {Board} from '../../models/BoardModel'
 
 /**
  * Creates user in Db.

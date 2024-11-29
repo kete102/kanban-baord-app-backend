@@ -1,7 +1,7 @@
 import {Router} from 'express'
-import {User} from '../models/User'
-import {Board} from '../models/Board'
-import {Task} from '../models/Task'
+import {User} from '../models/UserModel'
+import {Task} from '../models/TaskModel'
+import {Board} from '../models/BoardModel'
 
 export const boardRoutes = Router()
 

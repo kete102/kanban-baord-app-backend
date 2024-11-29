@@ -1,7 +1,7 @@
 import {Router} from 'express'
-import {Task} from '../models/Task'
+import {Task} from '../models/TaskModel'
 import {ITask} from '../types'
-import {Board} from '../models/Board'
+import {Board} from '../models/BoardModel'
 import {MongooseError} from 'mongoose'
 
 export const tasksRoutes = Router()
