@@ -10,6 +10,7 @@ import {connectToDB} from './db/db'
 import {PORT} from './config'
 import bodyParser from 'body-parser'
 import {clerkWebhook} from './webhooks/clerk/auth'
+import {checkAuth} from './middlewares/checkAuth'
 
 declare global {
 	namespace Express {
@@ -29,18 +30,17 @@ app.use(
 		allowedHeaders: ['Content-Type', 'Authorization'],
 	})
 )
+app.get('/', (_req, res) => {
+	res.status(200).json({
+		message: 'Welcome to the Kanban Board App API :)',
+	})
+})
 
 //NOTE: webhooks
 app.use('/api/webhooks', bodyParser.raw({type: 'application/json'}))
 app.post('/api/webhooks/clerk', clerkWebhook)
 
 app.use(express.json())
-
-app.get('/', (_req, res) => {
-	res.status(200).json({
-		message: 'Welcome',
-	})
-})
 
 //NOTE: Clerk middleware to check auth
 app.use(
@@ -50,15 +50,7 @@ app.use(
 			console.log('Auth error: ', error)
 		},
 	}),
-	async (req, res, next) => {
-		const {sessionId} = req.auth
-		if (!sessionId) {
-			res.status(401).json({
-				error: 'Not authenticated',
-			})
-		}
-		next()
-	}
+	checkAuth
 )
 
 app.use('/api/boards', boardRoutes)
