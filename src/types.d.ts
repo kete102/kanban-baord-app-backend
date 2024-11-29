@@ -25,9 +25,3 @@ export interface IBoard {
 	userId: mongoose.Schema.Types.ObjectId
 	createdAt: string
 }
-
-interface IUser {
-	userId: string
-	userName: string
-	avatarImage: string
-}
