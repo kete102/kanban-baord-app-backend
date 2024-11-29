@@ -2,7 +2,7 @@ import {Webhook, WebhookRequiredHeaders} from 'svix'
 import {CLERK_WEBHOOK_SECRET_KEY} from '../../config'
 import {WebhookEvent} from '@clerk/clerk-sdk-node'
 import {Request, Response} from 'express'
-import {createUser, deleteUser} from '../../services/userServices'
+import {createUser, deleteUser} from '../../services/user/userServices'
 
 export async function clerkWebhook(req: Request, res: Response) {
 	try {

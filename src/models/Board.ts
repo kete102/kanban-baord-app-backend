@@ -1,4 +1,4 @@
-import mongoose, {model, Schema} from 'mongoose'
+import {model, Schema} from 'mongoose'
 import {IBoard} from '../types'
 
 const boardSchema = new Schema<IBoard>({
@@ -11,8 +11,8 @@ const boardSchema = new Schema<IBoard>({
 		required: true,
 	},
 	userId: {
-		type: mongoose.Schema.Types.ObjectId,
-		ref: 'User',
+		type: String,
+		required: true,
 	},
 	createdAt: {type: String, required: true},
 })
