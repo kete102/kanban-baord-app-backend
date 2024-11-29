@@ -10,7 +10,7 @@ boardRoutes.get('/', (req, res) => {
 
 	User.findOne({clerkId: userId}).then(async (user) => {
 		if (user) {
-			Board.find({userId: user._id}).then(async (boards) => {
+			Board.find({userId: userId}).then(async (boards) => {
 				if (boards) {
 					res.status(200).json({boards})
 				}
@@ -24,7 +24,6 @@ boardRoutes.post('/', async (req, res) => {
 	const {boardTitle, boardDescription, columns, createdAt} = req.body
 
 	try {
-		// 1. Buscar el usuario por el ID de clerk
 		const user = await User.findOne({clerkId: userId})
 
 		if (!user) {
@@ -32,20 +31,15 @@ boardRoutes.post('/', async (req, res) => {
 				error: 'User not found',
 			})
 		}
-
-		// 2. Crear una nueva board
 		const newBoard = new Board({
-			userId: user._id,
+			userId: userId,
 			boardTitle,
 			boardDescription,
 			columns,
 			createdAt,
 		})
-
-		// 3. Guardar la nueva board en la base de datos
 		await newBoard.save()
 
-		// 4. Devolver el nuevo board
 		return res.status(200).json({newBoard})
 	} catch (error) {
 		// Manejo de errores
