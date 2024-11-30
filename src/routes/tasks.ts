@@ -1,17 +1,12 @@
 import {Router} from 'express'
-import {
-	createTask,
-	deleteTask,
-	getUserTasks,
-	updateTaskStatus,
-} from 'src/controllers/taskController'
+import {TaskController} from 'src/controllers/taskController'
 
 export const tasksRoutes = Router()
 
-tasksRoutes.get('/:id', getUserTasks)
-tasksRoutes.post('/:id', createTask)
-tasksRoutes.patch('/update-status', updateTaskStatus)
-tasksRoutes.delete('/', deleteTask)
+tasksRoutes.get('/:id', TaskController.getUserTasks)
+tasksRoutes.post('/:id', TaskController.createTask)
+tasksRoutes.patch('/update-status', TaskController.updateTaskStatus)
+tasksRoutes.delete('/', TaskController.deleteTask)
 
 //TODO: update entire task
 // tasksRoutes.put('/update-task', (req, res) => {})

@@ -29,7 +29,7 @@ export class BoardController {
 			}
 
 			return res.status(200).json({
-				userBoards: result.boards,
+				userBoards: result.board,
 			})
 		} catch (error) {
 			console.error('Error in getAll boards: ', error)

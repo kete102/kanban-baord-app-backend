@@ -1,3 +1,7 @@
 # 📝 **Lista de tareas**
 
--[x] Eliminar datos cuando se elimina un usuario. Eliminar las tasks y las boards.
+### Mejoras:
+
+- [x] **Eliminar datos cuando se elimina un usuario.** Eliminar las tasks y las boards.
+- [ ] Evitar que webhook se dispare dos veces.
+- [ ] Refactor para complir MVC.
