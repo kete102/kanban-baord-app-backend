@@ -1,13 +1,18 @@
-import {MongooseError} from 'mongoose'
+import mongoose, {MongooseError} from 'mongoose'
 import {Board} from 'src/models/BoardModel'
+import {Task} from 'src/models/TaskModel'
 import {User} from 'src/models/UserModel'
-import {CreateBoard, GetAllBoards} from 'src/typeDefinitions/board/board.types'
+import {
+	CreateBoard,
+	DeleteBoard,
+	GetAllBoards,
+} from 'src/typeDefinitions/board/board.types'
 
 /**
  * Fetches all boards associated with a given user.
  * @param {string} clerkId - User's Clerk Id.
- * @return {Promise<GetAllBoards>} Result of the operation
- **/
+ * @return {Promise<GetAllBoards>} User's boards.
+ * */
 export async function getAllBoards(clerkId: string): Promise<GetAllBoards> {
 	try {
 		const user = await User.findOne({clerkId: clerkId})
@@ -41,6 +46,14 @@ export async function getAllBoards(clerkId: string): Promise<GetAllBoards> {
 	}
 }
 
+/**
+ * Creates a new Board.
+ * @param {string} clerkId - User's Clerk Id.
+ * @param {string} boardTitle - Board title.
+ * @param {string} boardDescription  - Board description.
+ * @param {string} createdAt - Board creation date.
+ * @returns {Promise<CreateBoard>} New created board.
+ * */
 export async function createBoard({
 	clerkId,
 	boardTitle,
@@ -82,4 +95,57 @@ export async function createBoard({
 	}
 }
 
-export function deleteBoard() {}
+/**
+ * Deletes a board and its tasks.
+ * @param {string} clerkId - User's Clerk Id.
+ * @param {string} boardId - Id of the Board to delete.
+ * @returns {Promise<DeleteBoard>} Return the deleted board.
+ * */
+export async function deleteBoard({
+	clerkId,
+	boardId,
+}: {
+	clerkId: string
+	boardId: string
+}): Promise<DeleteBoard> {
+	const session = await mongoose.startSession()
+	session.startTransaction()
+	try {
+		const user = await User.findOne({clerkId: clerkId})
+
+		if (!user) {
+			return {
+				success: false,
+				message: `No user found with clerkId ${clerkId}`,
+			}
+		}
+
+		const deletedBoard = await Board.findByIdAndDelete(
+			{boardId: boardId},
+			{session}
+		)
+
+		if (!deletedBoard) {
+			return {
+				success: true,
+				message: `No board found with boardId ${boardId}`,
+			}
+		}
+		await Task.deleteMany({boardId: boardId}, {session})
+
+		await session.commitTransaction()
+		return {
+			success: true,
+			board: deletedBoard,
+		}
+	} catch (error) {
+		await session.abortTransaction()
+		if (error instanceof MongooseError) {
+			throw new Error(`Error deleting board with boardId ${boardId}`)
+		} else {
+			throw error
+		}
+	} finally {
+		await session.endSession()
+	}
+}

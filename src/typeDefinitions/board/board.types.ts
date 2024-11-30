@@ -11,3 +11,9 @@ export interface CreateBoard {
 	message?: string
 	board?: IBoard
 }
+
+export interface DeleteBoard {
+	success: boolean
+	message?: string
+	board?: IBoard
+}

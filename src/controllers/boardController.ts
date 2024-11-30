@@ -1,9 +1,6 @@
 import {Request, Response} from 'express'
 import {handleErrorResponse} from 'src/helpers/handleErrorResponse'
 import {boardSchema} from 'src/helpers/validateBoardRequestBody'
-import {Board} from 'src/models/BoardModel'
-import {Task} from 'src/models/TaskModel'
-import {User} from 'src/models/UserModel'
 import {getAllBoards, createBoard} from 'src/services/boards/boardsServices'
 import {ZodError} from 'zod'
 
@@ -35,7 +32,7 @@ export class BoardController {
 				userBoards: result.boards,
 			})
 		} catch (error) {
-			console.error('Error in getAll controller: ', error)
+			console.error('Error in getAll boards: ', error)
 			return handleErrorResponse({
 				res,
 				statusCode: 500,
@@ -102,34 +99,32 @@ export class BoardController {
 	}
 
 	static delete = async (req: Request, res: Response) => {
-		//TODO: add transactions to delete data relative to specific board
-		const {boardId} = req.params
-		const {userId} = req.auth
 		try {
-			const user = await User.findOne({clerkId: userId})
+			const {boardId} = req.params
+			const {userId} = req.auth
 
-			if (!user) {
-				return res.status(400).json({
-					error: 'User not found',
+			if (!userId) {
+				return handleErrorResponse({
+					res,
+					statusCode: 400,
+					errorMessage: 'No userId provided',
 				})
 			}
-			Board.findByIdAndDelete(boardId).then((deletedBoard) => {
-				if (!deletedBoard) {
-					return res.status(400).json({message: 'Board not  found'})
-				} else {
-					return res.status(200).json({message: 'Board deleted', deletedBoard})
-				}
-			})
 
-			Task.deleteMany({boardId: boardId})
-				.then(() => {
-					console.log('Data deleted')
+			if (!boardId) {
+				return handleErrorResponse({
+					res,
+					statusCode: 400,
+					errorMessage: 'No boardId provided',
 				})
-				.catch(() => {
-					console.log('Error')
-				})
+			}
 		} catch (error) {
-			console.log(error)
+			console.error('Error in deleteBoard: ', error)
+			return handleErrorResponse({
+				res,
+				statusCode: 500,
+				errorMessage: 'An error ocurred while deleting the board',
+			})
 		}
 	}
 }
