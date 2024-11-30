@@ -1,5 +1,11 @@
 import {model, Schema} from 'mongoose'
-import {IBoard} from '../types'
+
+export interface IBoard {
+	boardTitle: string
+	boardDescription: string
+	userId: string
+	createdAt: string
+}
 
 const boardSchema = new Schema<IBoard>({
 	boardTitle: {
