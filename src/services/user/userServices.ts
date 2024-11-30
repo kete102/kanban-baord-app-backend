@@ -1,7 +1,8 @@
 import mongoose, {MongooseError} from 'mongoose'
-import {IUser, User} from '../../models/UserModel'
+import {User} from '../../models/UserModel'
 import {Task} from '../../models/TaskModel'
 import {Board} from '../../models/BoardModel'
+import {CreateUser, Deleteuser} from 'src/typeDefinitions/user/user.types'
 
 /**
  * Creates user in Db.
@@ -15,7 +16,7 @@ import {Board} from '../../models/BoardModel'
 export async function createUser(
 	clerkId: string,
 	email: string
-): Promise<IUser> {
+): Promise<CreateUser> {
 	try {
 		const user = new User({
 			clerkId,
@@ -23,12 +24,21 @@ export async function createUser(
 		})
 
 		const savedUser = await user.save()
-		return savedUser
+		return {
+			success: true,
+			user: savedUser,
+		}
 	} catch (error) {
 		if (error instanceof MongooseError) {
-			throw new Error(`Error saving user ${clerkId}: ${error.message}`)
+			return {
+				success: false,
+				message: `MongooseError creating user ${clerkId}: ${error.message}`,
+			}
 		} else {
-			throw error
+			return {
+				success: false,
+				message: `Error creating user: ${error}`,
+			}
 		}
 	}
 }
@@ -41,16 +51,17 @@ export async function createUser(
  * @returns {Promise<string>} A message confirming the successful deletion of the user and related data.
  * @throws {Error} If the user does not exist or any operation in the transaction fails.
  */
-export async function deleteUser(clerkId: string): Promise<string> {
-	console.log('deleteUser')
+export async function deleteUser(clerkId: string): Promise<Deleteuser> {
 	const session = await mongoose.startSession()
 	session.startTransaction()
 	try {
 		const deletedUser = await User.findOne({clerkId})
-		console.log({deletedUser})
 
 		if (!deletedUser) {
-			return `User with clerkId ${clerkId} not found.`
+			return {
+				success: false,
+				message: `User with clerkId ${clerkId} not found.`,
+			}
 		}
 
 		await User.deleteOne({clerkId: clerkId}, {session})
@@ -59,13 +70,22 @@ export async function deleteUser(clerkId: string): Promise<string> {
 
 		await session.commitTransaction()
 
-		return `User with clerkId ${clerkId} and related data deleted successfully.`
+		return {
+			success: true,
+			message: `User with clerkId ${clerkId} and related data deleted successfully.`,
+		}
 	} catch (error) {
 		await session.abortTransaction()
 		if (error instanceof MongooseError) {
-			throw new Error(`Error during cascading deletion:  ${error.message}`)
+			return {
+				success: false,
+				message: `MongooseError during cascading deletion: ${error.message}`,
+			}
 		} else {
-			throw error
+			return {
+				success: false,
+				message: `Error during cascading deletion: ${error}`,
+			}
 		}
 	} finally {
 		session.endSession()
