@@ -2,7 +2,7 @@ import mongoose, {MongooseError} from 'mongoose'
 import {User} from '../../models/UserModel'
 import {Task} from '../../models/TaskModel'
 import {Board} from '../../models/BoardModel'
-import {CreateUser, Deleteuser} from 'src/typeDefinitions/user/user.types'
+import {UserService} from 'src/typeDefinitions/user/user.types'
 
 /**
  * Creates user in Db.
@@ -16,7 +16,7 @@ import {CreateUser, Deleteuser} from 'src/typeDefinitions/user/user.types'
 export async function createUser(
 	clerkId: string,
 	email: string
-): Promise<CreateUser> {
+): Promise<UserService> {
 	try {
 		const user = new User({
 			clerkId,
@@ -51,7 +51,7 @@ export async function createUser(
  * @returns {Promise<string>} A message confirming the successful deletion of the user and related data.
  * @throws {Error} If the user does not exist or any operation in the transaction fails.
  */
-export async function deleteUser(clerkId: string): Promise<Deleteuser> {
+export async function deleteUser(clerkId: string): Promise<UserService> {
 	const session = await mongoose.startSession()
 	session.startTransaction()
 	try {

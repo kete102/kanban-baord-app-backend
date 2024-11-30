@@ -2,18 +2,14 @@ import mongoose, {MongooseError} from 'mongoose'
 import {Board} from 'src/models/BoardModel'
 import {Task} from 'src/models/TaskModel'
 import {User} from 'src/models/UserModel'
-import {
-	CreateBoard,
-	DeleteBoard,
-	GetAllBoards,
-} from 'src/typeDefinitions/board/board.types'
+import {BoardsService} from 'src/typeDefinitions/board/board.types'
 
 /**
  * Fetches all boards associated with a given user.
  * @param {string} clerkId - User's Clerk Id.
  * @return {Promise<GetAllBoards>} User's boards.
  * */
-export async function getAllBoards(clerkId: string): Promise<GetAllBoards> {
+export async function getAllBoards(clerkId: string): Promise<BoardsService> {
 	try {
 		const user = await User.findOne({clerkId: clerkId})
 
@@ -35,7 +31,7 @@ export async function getAllBoards(clerkId: string): Promise<GetAllBoards> {
 
 		return {
 			success: true,
-			boards,
+			board: boards,
 		}
 	} catch (error) {
 		if (error instanceof MongooseError) {
@@ -64,7 +60,7 @@ export async function createBoard({
 	boardTitle: string
 	boardDescription: string
 	createdAt: string
-}): Promise<CreateBoard> {
+}): Promise<BoardsService> {
 	try {
 		const user = await User.findOne({clerkId: clerkId})
 
@@ -107,7 +103,7 @@ export async function deleteBoard({
 }: {
 	clerkId: string
 	boardId: string
-}): Promise<DeleteBoard> {
+}): Promise<BoardsService> {
 	const session = await mongoose.startSession()
 	session.startTransaction()
 	try {
