@@ -1,3 +1,4 @@
+import {Request, Response} from 'express'
 import mongoose from 'mongoose'
 
 export type ColumnType = 'todo' | 'inprogress' | 'done'
@@ -24,4 +25,9 @@ export interface IBoard {
 	boardDescription: string
 	userId: mongoose.Schema.Types.ObjectId
 	createdAt: string
+}
+
+export interface ControllerProps {
+	req: Request
+	res: Response
 }
