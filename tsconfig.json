@@ -3,6 +3,9 @@
 		"target": "ES2018",
 		"module": "commonjs",
 		"baseUrl": ".",
+		"paths": {
+			"src/*": ["./src/*"]
+		},
 		"sourceMap": true,
 		"outDir": "dist",
 		"esModuleInterop": true,

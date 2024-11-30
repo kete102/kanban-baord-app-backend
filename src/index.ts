@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-empty-object-type */
 /* eslint-disable @typescript-eslint/no-namespace */
+import 'module-alias/register'
 import 'dotenv/config'
 import cors from 'cors'
 import express, {Application} from 'express'
