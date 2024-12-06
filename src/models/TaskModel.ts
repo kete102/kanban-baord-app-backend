@@ -1,3 +1,4 @@
+import {z} from 'zod'
 import {model, Schema} from 'mongoose'
 
 export type ColumnType = 'todo' | 'inprogress' | 'done'
@@ -35,3 +36,27 @@ export const taskSchema = new Schema<ITask>({
 })
 
 export const Task = model<ITask>('Task', taskSchema)
+
+//NOTE: Zod Schema
+
+const ColumnTypeEnum = z.enum(['todo', 'done', 'inprogress'], {
+	description: 'Task status: todo, done, inprogress',
+})
+
+const PriorityEnum = z.enum(['high', 'medium', 'low'], {
+	description: 'Task priority: high, medium, low',
+})
+
+export const TaskZodSchema = z.object({
+	userId: z.string({required_error: 'Missing required field: userId '}),
+	boardId: z.string({required_error: 'Missing required field:  boardId '}),
+	taskTitle: z.string({required_error: 'Missing required field: taskTitle '}),
+	taskDescription: z.string({
+		required_error: 'Missing required field: taskDescription',
+	}),
+	status: ColumnTypeEnum,
+	priority: PriorityEnum,
+	createdAt: z.string({required_error: 'Missing required field: createdAt'}),
+	lastUpdate: z.number({required_error: 'Missing required field: lastUpdate'}),
+	endDate: z.string({required_error: 'Missing required field: endDate '}),
+})
