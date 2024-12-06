@@ -6,7 +6,6 @@ const ClerkClient = createClerkClient({
 const port = process.env.PORT || '3000'
 export let MONGODB_CONNECTION_STRING = ''
 
-console.log(`NODE_ENV: ${process.env.NODE_ENV}`)
 if (process.env.NODE_ENV === 'development') {
 	MONGODB_CONNECTION_STRING = process.env
 		.LOCAL_MONGODB_CONNECTION_STRING as string

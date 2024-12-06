@@ -3,12 +3,11 @@ import 'dotenv/config'
 import {MONGODB_CONNECTION_STRING} from 'src/config'
 
 export function connectToDB() {
-	console.log(MONGODB_CONNECTION_STRING)
 	try {
 		mongoose
 			.connect(MONGODB_CONNECTION_STRING)
 			.then(async () => {
-				console.log(`Database Name: ${mongoose.connection.db?.databaseName}`)
+				console.log(`DB connection success.`)
 			})
 			.catch((error) => {
 				console.error('Error connecting to DB', error)
