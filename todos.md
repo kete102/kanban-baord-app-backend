@@ -5,3 +5,7 @@
 - [x] **Eliminar datos cuando se elimina un usuario.** Eliminar las tasks y las boards.
 - [ ] Evitar que webhook se dispare dos veces.
 - [ ] Refactor para complir MVC.
+
+### Fix:
+
+- [ ] No se elimina la board
