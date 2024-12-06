@@ -1,7 +1,10 @@
 import {Request, Response} from 'express'
 import {handleErrorResponse} from 'src/helpers/handleErrorResponse'
-import {boardSchema} from 'src/helpers/validateBoardRequestBody'
-import {getAllBoards, createBoard} from 'src/services/boards/boardsServices'
+import {
+	getAllBoards,
+	createBoard,
+	deleteBoard,
+} from 'src/services/boards/boardsServices'
 import {ZodError} from 'zod'
 
 export class BoardController {
@@ -24,12 +27,12 @@ export class BoardController {
 				return handleErrorResponse({
 					res,
 					statusCode: 404,
-					errorMessage: result.message || 'Boards not found',
+					errorMessage: result.error || 'Boards not found',
 				})
 			}
 
 			return res.status(200).json({
-				userBoards: result.board,
+				boards: result.board,
 			})
 		} catch (error) {
 			console.error('Error in getAll boards: ', error)
@@ -54,14 +57,11 @@ export class BoardController {
 				})
 			}
 
-			const validatedBody = boardSchema.parse(req.body)
-			const {boardTitle, boardDescription, createdAt} = validatedBody
+			const boardData = req.body
 
 			const result = await createBoard({
 				clerkId: userId,
-				boardTitle,
-				boardDescription,
-				createdAt,
+				boardData,
 			})
 
 			if (!result.success) {
@@ -73,7 +73,7 @@ export class BoardController {
 			}
 
 			return res.status(200).json({
-				newBoard: result.board,
+				boards: result.board,
 			})
 		} catch (error) {
 			console.error('Error in create board controller: ', error)
@@ -99,6 +99,7 @@ export class BoardController {
 	}
 
 	static delete = async (req: Request, res: Response) => {
+		console.log('delete board')
 		try {
 			const {boardId} = req.params
 			const {userId} = req.auth
@@ -118,6 +119,14 @@ export class BoardController {
 					errorMessage: 'No boardId provided',
 				})
 			}
+
+			const result = await deleteBoard({clerkId: userId, boardId})
+
+			if (!result.success) {
+				return res.status(400).json({board: result.board})
+			}
+
+			return res.status(200).json({board: result.board})
 		} catch (error) {
 			console.error('Error in deleteBoard: ', error)
 			return handleErrorResponse({

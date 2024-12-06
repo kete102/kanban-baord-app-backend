@@ -1,22 +1,25 @@
 import mongoose, {MongooseError} from 'mongoose'
+import {boardZodSchema} from 'src/helpers/validateBoardRequestBody'
 import {Board} from 'src/models/BoardModel'
 import {Task} from 'src/models/TaskModel'
 import {User} from 'src/models/UserModel'
 import {BoardsService} from 'src/typeDefinitions/board/board.types'
+import {ZodError} from 'zod'
 
 /**
  * Fetches all boards associated with a given user.
  * @param {string} clerkId - User's Clerk Id.
- * @return {Promise<GetAllBoards>} User's boards.
+ * @return {Promise<BoardsService>} User's boards.
  * */
 export async function getAllBoards(clerkId: string): Promise<BoardsService> {
+	console.log('get all boards')
 	try {
 		const user = await User.findOne({clerkId: clerkId})
 
 		if (!user) {
 			return {
 				success: false,
-				message: `No user found with clerkId: ${clerkId}`,
+				error: `No user found with clerkId: ${clerkId}`,
 			}
 		}
 
@@ -25,64 +28,70 @@ export async function getAllBoards(clerkId: string): Promise<BoardsService> {
 		if (!boards) {
 			return {
 				success: false,
-				message: `No boards found for user ${clerkId}`,
+				error: `No boards found for user ${clerkId}`,
 			}
 		}
 
 		return {
 			success: true,
+			message: `User's boards`,
 			board: boards,
 		}
 	} catch (error) {
 		if (error instanceof MongooseError) {
-			throw new Error(`Error saving user ${clerkId}: ${error.message}`)
+			throw new Error(
+				`Error fetching boards fot user ${clerkId}: ${error.message}`
+			)
 		} else {
 			throw error
 		}
 	}
 }
 
+interface CreateBoard {
+	clerkId: string
+	boardData: Zod.infer<typeof boardZodSchema>
+}
 /**
  * Creates a new Board.
  * @param {string} clerkId - User's Clerk Id.
- * @param {string} boardTitle - Board title.
- * @param {string} boardDescription  - Board description.
- * @param {string} createdAt - Board creation date.
- * @returns {Promise<CreateBoard>} New created board.
+ * @param {string} boardData - New board data.
+ * @returns {Promise<BoardsService>} New created board.
  * */
 export async function createBoard({
 	clerkId,
-	boardTitle,
-	boardDescription,
-	createdAt,
-}: {
-	clerkId: string
-	boardTitle: string
-	boardDescription: string
-	createdAt: string
-}): Promise<BoardsService> {
+	boardData,
+}: CreateBoard): Promise<BoardsService> {
+	console.log('create board')
 	try {
 		const user = await User.findOne({clerkId: clerkId})
+
+		const validatedBoardData = boardZodSchema.parse(boardData)
 
 		if (!user) {
 			return {
 				success: false,
-				message: `No user found with clerkId: ${clerkId}`,
+				error: `No user found with clerkId: ${clerkId}`,
 			}
 		}
 		const newBoard = new Board({
 			userId: clerkId,
-			boardTitle,
-			boardDescription,
 			columns: ['done', 'in-progress', 'done'],
-			createdAt,
+			...validatedBoardData,
 		})
 		const savedBoard = await newBoard.save()
 		return {
 			success: true,
+			message: 'New board created',
 			board: savedBoard,
 		}
 	} catch (error) {
+		if (error instanceof ZodError) {
+			return {
+				success: false,
+				error: `Validation error: ${error.message}`,
+			}
+		}
 		if (error instanceof MongooseError) {
 			throw new Error(`Error saving user ${clerkId}: ${error.message}`)
 		} else {
@@ -112,19 +121,16 @@ export async function deleteBoard({
 		if (!user) {
 			return {
 				success: false,
-				message: `No user found with clerkId ${clerkId}`,
+				error: `No user found with clerkId ${clerkId}`,
 			}
 		}
 
-		const deletedBoard = await Board.findByIdAndDelete(
-			{boardId: boardId},
-			{session}
-		)
+		const deletedBoard = await Board.findOneAndDelete({_id: boardId}, {session})
 
 		if (!deletedBoard) {
 			return {
-				success: true,
-				message: `No board found with boardId ${boardId}`,
+				success: false,
+				error: `No board found with boardId ${boardId}`,
 			}
 		}
 		await Task.deleteMany({boardId: boardId}, {session})
@@ -132,12 +138,15 @@ export async function deleteBoard({
 		await session.commitTransaction()
 		return {
 			success: true,
+			message: 'Board deleted',
 			board: deletedBoard,
 		}
 	} catch (error) {
 		await session.abortTransaction()
 		if (error instanceof MongooseError) {
-			throw new Error(`Error deleting board with boardId ${boardId}`)
+			throw new Error(
+				`Error deleting board with boardId ${boardId}: ${error.message}`
+			)
 		} else {
 			throw error
 		}
