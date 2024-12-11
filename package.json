@@ -8,7 +8,8 @@
 		"lint": "eslint src/**/*.ts --fix",
 		"build": "npm run clean && tsc --project tsconfig.json && tsc-alias -p tsconfig.json",
 		"clean": "rm -rf dist",
-		"type-check": "tsc --noEmit"
+		"type-check": "tsc --noEmit",
+		"ngrok": "ngrok http --url=fully-balanced-goldfish.ngrok-free.app 3000"
 	},
 	"keywords": [],
 	"author": "",
