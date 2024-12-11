@@ -57,7 +57,7 @@ export class BoardController {
 				})
 			}
 
-			const boardData = req.body
+			const {newBoard: boardData} = req.body
 
 			const result = await createBoard({
 				clerkId: userId,

@@ -12,7 +12,6 @@ import {ZodError} from 'zod'
  * @return {Promise<BoardsService>} User's boards.
  * */
 export async function getAllBoards(clerkId: string): Promise<BoardsService> {
-	console.log('get all boards')
 	try {
 		const user = await User.findOne({clerkId: clerkId})
 
