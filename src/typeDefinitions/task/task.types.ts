@@ -18,7 +18,6 @@ export interface GetAllTasks {
 
 export interface CreateTask {
 	clerkId: string
-	boardId: string
 	taskData: Zod.infer<typeof createTaskZodSchema>
 }
 

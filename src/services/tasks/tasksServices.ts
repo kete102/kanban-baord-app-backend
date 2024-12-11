@@ -28,6 +28,7 @@ export async function getAllTasks({
 				error: `No tasks found for user ${clerkId}`,
 			}
 		}
+		console.log(tasks)
 
 		return {
 			success: true,
@@ -45,7 +46,6 @@ export async function getAllTasks({
 
 export async function createTask({
 	clerkId,
-	boardId,
 	taskData,
 }: CreateTask): Promise<TasksService> {
 	const validation = createTaskZodSchema.safeParse(taskData)
@@ -57,18 +57,20 @@ export async function createTask({
 	}
 
 	try {
-		const board = await Board.findOne({_id: boardId, userId: clerkId})
+		const board = await Board.findOne({
+			_id: validation.data.boardId,
+			userId: clerkId,
+		})
 
 		if (!board) {
 			return {
 				success: true,
-				error: `No board found with boardId ${boardId} for user ${clerkId}`,
+				error: `No board found with boardId ${validation.data.boardId} for user ${clerkId}`,
 			}
 		}
 
 		const newTask = new Task({
 			userId: clerkId,
-			boardId: boardId,
 			...validation.data,
 		})
 
@@ -112,7 +114,7 @@ export async function updateTaskStatus({
 		const updatedTask = await Task.findOneAndUpdate(
 			{userId, _id: taskId},
 			{
-				status: newStatus,
+				taskStatus: newStatus,
 			},
 			{new: true}
 		)
@@ -146,7 +148,7 @@ export async function deleteTask({
 	taskData,
 }: DeleteTask): Promise<TasksService> {
 	try {
-		const validation = deleteTaskZodSchema.safeParse({clerkId, taskData})
+		const validation = deleteTaskZodSchema.safeParse(taskData)
 
 		if (!validation.success) {
 			return {
@@ -157,8 +159,9 @@ export async function deleteTask({
 
 		const targetBoard = await Board.findOne({
 			_id: validation.data.boardId,
-			userId: validation.data.clerkId,
+			userId: clerkId,
 		})
+
 		if (!targetBoard) {
 			return {
 				success: false,
@@ -168,7 +171,7 @@ export async function deleteTask({
 
 		const taskToDelte = await Task.findOneAndDelete({
 			_id: validation.data.taskId,
-			userId: validation.data.clerkId,
+			userId: clerkId,
 		})
 
 		return {

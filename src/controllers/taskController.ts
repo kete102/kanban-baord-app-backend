@@ -73,7 +73,7 @@ export class TaskController {
 
 			const taskData = req.body
 
-			const result = await createTask({clerkId: userId, boardId, taskData})
+			const result = await createTask({clerkId: userId, taskData})
 			if (!result.success && result.error) {
 				handleErrorResponse({res, statusCode: 400, errorMessage: result.error})
 			}
@@ -134,10 +134,10 @@ export class TaskController {
 			})
 		}
 
-		return {
+		return res.status(200).json({
 			ok: true,
 			message: result.message,
 			task: result.tasks,
-		}
+		})
 	}
 }

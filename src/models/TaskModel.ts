@@ -8,11 +8,11 @@ export interface ITask {
 	boardId: string
 	taskTitle: string
 	taskDescription: string
-	status: ColumnType
-	priority: 'high' | 'low' | 'medium'
+	taskStatus: ColumnType
+	taskPriority: 'high' | 'low' | 'medium'
 	createdAt: string
 	lastUpdate: number
-	endDate: string
+	taskEndDate: string
 }
 
 export const taskSchema = new Schema<ITask>({
@@ -20,19 +20,19 @@ export const taskSchema = new Schema<ITask>({
 	boardId: {type: String, required: true},
 	taskTitle: {type: String, required: true},
 	taskDescription: {type: String, required: true},
-	status: {
+	taskStatus: {
 		type: String,
 		enum: ['todo', 'inprogress', 'done'],
 		required: true,
 	},
-	priority: {
+	taskPriority: {
 		type: String,
 		enum: ['high', 'medium', 'low'],
 		required: true,
 	},
 	createdAt: {type: String, required: true},
 	lastUpdate: {type: Number, required: true},
-	endDate: {type: String, required: true},
+	taskEndDate: {type: String, required: true},
 })
 
 export const Task = model<ITask>('Task', taskSchema)
