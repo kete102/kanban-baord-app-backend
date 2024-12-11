@@ -1,4 +1,4 @@
-import mongoose, {MongooseError} from 'mongoose'
+import {MongooseError} from 'mongoose'
 import {boardZodSchema} from 'src/helpers/validateBoardRequestBody'
 import {Board} from 'src/models/BoardModel'
 import {Task} from 'src/models/TaskModel'
@@ -112,8 +112,6 @@ export async function deleteBoard({
 	clerkId: string
 	boardId: string
 }): Promise<BoardsService> {
-	const session = await mongoose.startSession()
-	session.startTransaction()
 	try {
 		const user = await User.findOne({clerkId: clerkId})
 
@@ -124,7 +122,7 @@ export async function deleteBoard({
 			}
 		}
 
-		const deletedBoard = await Board.findOneAndDelete({_id: boardId}, {session})
+		const deletedBoard = await Board.findOneAndDelete({_id: boardId})
 
 		if (!deletedBoard) {
 			return {
@@ -132,16 +130,28 @@ export async function deleteBoard({
 				error: `No board found with boardId ${boardId}`,
 			}
 		}
-		await Task.deleteMany({boardId: boardId}, {session})
+		const cascadeDeleteTasks = await Task.deleteMany({boardId: boardId})
 
-		await session.commitTransaction()
+		if (!cascadeDeleteTasks.acknowledged) {
+			return {
+				success: false,
+				error: `Error deleting tasks from board ${boardId}`,
+			}
+		}
+
+		if (cascadeDeleteTasks.deletedCount === 0) {
+			return {
+				success: true,
+				message: `No tasks found in board ${boardId}`,
+			}
+		}
+
 		return {
 			success: true,
-			message: 'Board deleted',
+			message: `Board ${boardId} and it's data deleted`,
 			board: deletedBoard,
 		}
 	} catch (error) {
-		await session.abortTransaction()
 		if (error instanceof MongooseError) {
 			throw new Error(
 				`Error deleting board with boardId ${boardId}: ${error.message}`
@@ -149,7 +159,5 @@ export async function deleteBoard({
 		} else {
 			throw error
 		}
-	} finally {
-		await session.endSession()
 	}
 }
