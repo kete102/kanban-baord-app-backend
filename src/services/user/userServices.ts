@@ -94,6 +94,10 @@ export async function deleteUser(clerkId: string): Promise<UserService> {
 
 		await session.commitTransaction()
 
+		console.log({
+			success: true,
+			message: `User with clerkId ${clerkId} and related data deleted successfully.`,
+		})
 		return {
 			success: true,
 			message: `User with clerkId ${clerkId} and related data deleted successfully.`,
