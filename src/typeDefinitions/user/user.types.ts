@@ -4,4 +4,5 @@ export interface UserService {
 	success: boolean
 	message?: string
 	user?: IUser
+	error?: string
 }

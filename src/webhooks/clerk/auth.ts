@@ -15,19 +15,19 @@ export async function clerkWebhook(req: Request, res: Response) {
 
 		switch (eventType) {
 			case 'user.created': {
-				const {email_addresses, id} = evt.data
-				const primaryEmail = email_addresses[0].email_address
-
-				if (!primaryEmail) {
-					return res.status(400).json({
-						succes: false,
-						message: 'No primary email found',
-					})
-				}
-
 				try {
+					const {email_addresses, id} = evt.data
+					const primaryEmail = email_addresses[0].email_address
+
+					if (!primaryEmail) {
+						return res.status(400).json({
+							succes: false,
+							message: 'No primary email found',
+						})
+					}
+
 					const newUser = await createUser(id, primaryEmail)
-					console.log(`User ${newUser} created successfully`)
+
 					return res.status(200).json({
 						success: true,
 						message: `User ${id} saved in DB`,
@@ -43,23 +43,23 @@ export async function clerkWebhook(req: Request, res: Response) {
 			}
 
 			case 'user.deleted': {
-				const {id} = evt.data
-
-				if (!id) {
-					return res.status(400).json({
-						succes: false,
-						message: 'Error: no id provided',
-					})
-				}
-
 				try {
+					const {id} = evt.data
+
+					if (!id) {
+						return res.status(400).json({
+							succes: false,
+							message: 'Error: no id provided',
+						})
+					}
+
 					const message = await deleteUser(id)
 					return res.status(200).json({
 						succes: true,
 						message,
 					})
 				} catch (error) {
-					console.log(error)
+					console.log('Error deleting User', error)
 					if (error instanceof Error) {
 						return res.status(404).json({
 							succes: false,
@@ -68,7 +68,7 @@ export async function clerkWebhook(req: Request, res: Response) {
 					}
 					return res.status(404).json({
 						succes: false,
-						message: `Error deleting user ${id}`,
+						message: `Error deleting User`,
 					})
 				}
 			}
