@@ -1,4 +1,4 @@
-import mongoose, {MongooseError} from 'mongoose'
+import {MongooseError} from 'mongoose'
 import {Board} from 'src/models/BoardModel'
 import {Task} from 'src/models/TaskModel'
 import {User} from 'src/models/UserModel'
@@ -26,7 +26,7 @@ export async function createUser(
 		const alreadyExistsUserWithEmail = await User.findOne({email: email})
 
 		if (alreadyExistsUserWithEmail) {
-			console.log({
+			console.error({
 				success: false,
 				error: `Already exists user with email: ${email}`,
 			})
@@ -36,20 +36,25 @@ export async function createUser(
 		const savedUser = await user.save()
 
 		if (!savedUser) {
-			console.log({
+			console.error({
 				success: false,
 				error: `Erro saving new User: ${clerkId}, ${email}`,
 			})
 			throw new Error(`Error saving new User: ${clerkId}, ${email}`)
 		}
 
+		console.info({
+			success: true,
+			message: 'New user created',
+			user: savedUser,
+		})
 		return {
 			success: true,
 			user: savedUser,
 		}
 	} catch (error) {
 		if (error instanceof MongooseError) {
-			console.log({
+			console.error({
 				success: false,
 				message: `MongooseError creating user ${clerkId}: ${error.message}`,
 			})
@@ -57,7 +62,7 @@ export async function createUser(
 				`MongooseError creating user ${clerkId}: ${error.message}`
 			)
 		} else {
-			console.log({
+			console.error({
 				success: false,
 				message: `Error creating user: ${error}`,
 			})
@@ -75,37 +80,57 @@ export async function createUser(
  * @throws {Error} If the user does not exist or any operation in the transaction fails.
  */
 export async function deleteUser(clerkId: string): Promise<UserService> {
-	const session = await mongoose.startSession()
-	session.startTransaction()
+	if (!clerkId || typeof clerkId !== 'string') {
+		throw new Error('Invalid clerkId provided. It must be a non-empty string.')
+	}
 	try {
-		const deletedUser = await User.findOne({clerkId})
+		const user = await User.findOne({clerkId})
 
-		if (!deletedUser) {
-			console.log({
+		if (!user) {
+			console.error({
 				success: false,
-				message: `User with clerkId ${clerkId} not found.`,
+				error: `User with clerkId ${clerkId} not found.`,
 			})
 			throw new Error(`User with clerkId ${clerkId} not found.`)
 		}
 
-		await User.deleteOne({clerkId: clerkId}, {session})
-		await Task.deleteMany({userId: clerkId}, {session})
-		await Board.deleteMany({userId: clerkId}, {session})
+		const deletionResults = await Promise.allSettled([
+			User.deleteOne({clerkId: clerkId}),
+			Task.deleteMany({userId: clerkId}),
+			Board.deleteMany({userId: clerkId}),
+		])
 
-		await session.commitTransaction()
+		// Check for any failures in the cascading deletions
+		const failedDeletions = deletionResults.filter(
+			(result) => result.status === 'rejected'
+		)
 
-		console.log({
+		if (failedDeletions.length > 0) {
+			const errorDetails = failedDeletions.map(
+				(failure) => (failure as PromiseRejectedResult).reason
+			)
+			console.error({
+				success: false,
+				message: `Partial failure during cascading deletion for clerkId ${clerkId}.`,
+				errors: errorDetails,
+			})
+			throw new Error(
+				`Partial failure during cascading deletion: ${errorDetails.join('; ')}`
+			)
+		}
+
+		console.info({
 			success: true,
 			message: `User with clerkId ${clerkId} and related data deleted successfully.`,
 		})
+
 		return {
 			success: true,
 			message: `User with clerkId ${clerkId} and related data deleted successfully.`,
 		}
 	} catch (error) {
-		await session.abortTransaction()
 		if (error instanceof MongooseError) {
-			console.log({
+			console.error({
 				success: false,
 				message: `MongooseError during cascading deletion: ${error.message}`,
 			})
@@ -113,13 +138,11 @@ export async function deleteUser(clerkId: string): Promise<UserService> {
 				`MongooseError during cascading deletion: ${error.message}`
 			)
 		} else {
-			console.log({
+			console.error({
 				success: false,
 				message: `Error during cascading deletion: ${error}`,
 			})
 			throw new Error(`Error during cascading deletion: ${error}`)
 		}
-	} finally {
-		session.endSession()
 	}
 }
